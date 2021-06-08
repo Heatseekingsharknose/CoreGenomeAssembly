@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+------------------------------------------------------------------------------------------------
+
+Scientific Question: {2 points} What is the core genome of life? Comparative genomics of plant, bacterial and animal sequences.
+
+In its essence, life is but beads on a string, more strictly speaking, nucleic acids on a sugar string. Together, these rearrange into all the marvel of the living world. However, if these variations are what makes everything different, how do we all share this metabolic state which we call life? What do we have in common with a tomato plant or a pathogenic bacteria, lethal to us? By assembling core genomes and subsequent pan-genomes of life's subgroups, the veil will fall on the similarities and differences (Juhas, M.Trends in Cell Biology 2011). Core genomes are assembled from sequenced genome databases by comparing them to each other and extracting the sequences that remain unchanged, as well as mapping the regions that show slight maleability.(Marçais, G. et al. MUMmer4: A fast and versatile genome alignment system. PLOS Computational Biology 14, e1005944 2018).
+------------------------------------------------------------------------------------------------
+Scientific Hypothesis: { 2 points } Regions necessary for life will be conserved across all major groups of life, which will allow for a precise isolation of a core "life genome" by simply comparing multiple genomes from across kingdoms of life.
+
+Here, a multiple sequence alignment will be performed comparing a set database of genomes to then extract the ones that overlap across all groups. For each kingdom, k means clustering will group gene sets that make that set different from the generated core genome of life, which will be used as reference. Variation plots will be made for the core genome of all the kingdoms together as well as individually. Furthermore, I will perform a BLAST search to find the current organism that most resembles my core genome assembly to verify its phylogeny, which will act as a control for my methods.
+------------------------------------------------------------------------------------------------
+Below, this bit of code is responsible for loading in all of the necessary packages. Here is where I will define the packages and what they are loaded in for {3 points for adequately describing the packages}:
+
+1) BioConductor
+2) msa :this is the multiple sequence alignment package within bioconductor which has 3 analysis algorithms (ClustalW, ClustalOmega and Muscle)
+3) Biostrings is to read the fasta files you want to compare.
+
+Before running the code below, in the console I needed to install the packages using the commands:
+
+{2 points to write here what commands needed to be typed into the console to install the necessary packages}
+
+```{r}
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
+
+BiocManager::install("msa")
+library(Biostrings)
+
+#to test installation
+library(msa)
+
+#for the location of latex stuff
+system.file("tex", "texshade.sty", package="msa")
+# 3 points for loading all of the packages needed correctly
+```
+
+-------------------------------------------
+Now, I need to load my fasta files for my assorted genomes, which is done below. For this analysis I chose to comapare Arabidopsis, Drosophila, e.Coli, human and S. Cerevisiae.
+```{r}
+arabidopsis <- "arabidopsis_genomic.fna"
+human <- "humang38_genomic.fna"
+drosophila <- "Drosophila_genomic.fna"
+scerevisiae <- "SCerevisiae_R64_genomic.fna"
+
+```
+All of these files were downloaded from the NCBI Assembly database, using the most up to date and cited reference assemblies, all found here: https://www.ncbi.nlm.nih.gov/assembly/
+----------------------------------------------------------------------------
+
+
