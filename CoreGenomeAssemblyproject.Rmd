@@ -25,7 +25,7 @@ Below, this bit of code is responsible for loading in all of the necessary packa
 1) BioConductor
 2) msa :this is the multiple sequence alignment package within bioconductor which has 3 analysis algorithms (ClustalW, ClustalOmega and Muscle)
 3) Biostrings is to read the fasta files you want to compare.
-
+4)ggmsa for, as we say in the ed-biz, visual aid
 Before running the code below, in the console I needed to install the packages using the commands:
 
 {2 points to write here what commands needed to be typed into the console to install the necessary packages}
@@ -33,31 +33,97 @@ Before running the code below, in the console I needed to install the packages u
 ```{r}
 
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install()
-
-BiocManager::install("msa")
+library(BiocManager)
+library(ggplot2)
+library(stringi)
 library(Biostrings)
 
-#to test installation
-library(msa)
+library(ggmsa)
+library(devtools)
 
-#for the location of latex stuff
-system.file("tex", "texshade.sty", package="msa")
+#Now, msa may be faster but I'm having trouble with a missing set of packages called seqmagick and XVector
+#library(msa)
+
+#I am also installing multiple sequence alignment visualization tools by the Yu lab at Southern med that use ggplot2, you need to install devtools for it
+#if (!requireNamespace("devtools", quietly=TRUE))
+   # install.packages("devtools")
+#devtools::install_github("YuLab-SMU/ggmsa")
+#install.packages('ggmsa')
+
+
+#to test installation
+#library(msa)
+
+
 # 3 points for loading all of the packages needed correctly
 ```
 
 -------------------------------------------
-Now, I need to load my fasta files for my assorted genomes, which is done below. For this analysis I chose to comapare Arabidopsis, Drosophila, e.Coli, human and S. Cerevisiae.
+Now, I need to load my fasta files for my assorted genomes, which is done below. For this analysis I chose to comapare Arabidopsis, Drosophila, e.Coli, human and S. Cerevisiae. I decided to rather download the available packages in Bioconductor from UCSC straight onto R rather than pull it from a filepath because it was having issues
 ```{r}
-arabidopsis <- "arabidopsis_genomic.fna"
-human <- "humang38_genomic.fna"
-drosophila <- "Drosophila_genomic.fna"
-scerevisiae <- "SCerevisiae_R64_genomic.fna"
 
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+install.packages("seqmagick")
+
+BiocManager::install("BSgenome.Celegans.UCSC.ce11")
+BiocManager::install("BSgenome.Dmelanogaster.UCSC.dm6")
+BiocManager::install("BSgenome.Athaliana.TAIR.TAIR9")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+BiocManager::install("BSgenome.Scerevisiae.UCSC.sacCer3")
+BiocManager::install("BSgenome.Ecoli.NCBI.20080805")
 ```
-All of these files were downloaded from the NCBI Assembly database, using the most up to date and cited reference assemblies, all found here: https://www.ncbi.nlm.nih.gov/assembly/
+All of these files were found on the Bioconductor site and they are compiled by the wonderful people at UCSC.
 ----------------------------------------------------------------------------
+```{r}
+ggmsa(protein_sequences, 221, 280, seq_name = TRUE, char_width = 0.5) + geom_seqlogo(color = "Chemistry_AA") + geom_msaBar()
+```
+
+This code now handles the alignments and the vis-aid. The code aligns the amino acid to allow for the degeneracy of nucleic acid to amino acid code, seeing as AAs are more conserved.This alignment is therefore truer. It is also in charge of building the phylogenetic tree, sequence alignment graph and gene conservation graph that will aid in the core genome development
+ 
+```{r}
 
 
+#tree
+test <- readAAStringSet()
+d <- as.dist(stringDist(tp53, method = "hamming")/width(tp53)[1])
+tree <- bionj(d)
+p_test <- ggtree(tree, branch.length = 'none') + geom_tiplab()
+#msa
+data_test <- tidy_msa(test)
+
+#gene maps
+test_arrow <- readxl::read_xlsx(test)
+test_arrow$direction <- 1
+test_arrow[test_arrow$strand == "reverse","direction"] <- -1
+
+#color
+library(RColorBrewer)
+mapping = aes(xmin = start, xmax = end, fill = gene, forward = direction)
+my_pal <- colorRampPalette(rev(brewer.pal(n = 10, name = "Set3")))
+
+#tree + gene maps + msa
+library(ggnewscale)
+p_test + geom_facet(geom = geom_msa, data = data_test,
+                     panel = 'msa', font = NULL,
+                     border = NA) + xlim_tree(3.5) + 
+          new_scale_fill() +
+          scale_fill_manual(values = my_pal(10)) +
+          geom_facet(geom = geom_motif,
+                     mapping = mapping, data = test_arrow,
+                     panel = 'genes',  on = 'Test',
+                     arrowhead_height = unit(3, "mm"),
+                     arrowhead_width = unit(1, "mm"))
+```
+
+Now this code below presents the alignments broken down in multiple rows, making visualization of the data a bit easier but you might miss on the patternings (for fun cases like TADs or other spatially determined pattern)
+
+```{r}
+#the facet_msa is used to break down the full alignment and field determines the length to be visualized
+ ggmsa(protein_sequences, start = 0, end = , font = NULL, color = "Chemistry_AA") + facet_msa(field = 100)
+```
+ 
+
+ Analysis of results shows that
+ 
+ 
