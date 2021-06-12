@@ -23,10 +23,11 @@ Here, a multiple sequence alignment will be performed comparing a set database o
 Below, this bit of code is responsible for loading in all of the necessary packages. Here is where I will define the packages and what they are loaded in for {3 points for adequately describing the packages}:
 
 1) BioConductor
-2) msa :this is the multiple sequence alignment package within bioconductor which has 3 analysis algorithms (ClustalW, ClustalOmega and Muscle)
-3) Biostrings is to read the fasta files you want to compare.
-4)ggmsa for, as we say in the ed-biz, visual aid
-Before running the code below, in the console I needed to install the packages using the commands:
+
+2) Biostrings is to read the fasta files you want to compare.
+3)ggmsa for, as we say in the ed-biz, visual aid
+4) I also opted to install the genome packages further down below rather than accessing them from a download
+5) Colorbrewer and ggnewscale were used to color and build the graphics
 
 {2 points to write here what commands needed to be typed into the console to install the necessary packages}
 
